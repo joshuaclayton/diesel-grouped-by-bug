@@ -3,6 +3,8 @@
 1. Clone the repo
 2. Ensure you've got Rust installed
 3. Run `bin/run`
+4. Change the order of foreign keys on `Transaction` (parts of it should work
+   when `merchant_id` is third in the struct)
 
 This should result in each merchant listed having one corresponding transaction.
 

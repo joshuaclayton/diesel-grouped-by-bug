@@ -9,6 +9,18 @@ fn find_merchant_by_id(connection: &SqliteConnection, id: i32) -> QueryResult<Me
         .first(connection)
 }
 
+fn find_account_by_id(connection: &SqliteConnection, id: i32) -> QueryResult<Account> {
+    accounts::table
+        .filter(accounts::id.eq(id))
+        .first(connection)
+}
+
+fn find_category_by_id(connection: &SqliteConnection, id: i32) -> QueryResult<Category> {
+    categories::table
+        .filter(categories::id.eq(id))
+        .first(connection)
+}
+
 fn main() {
     let connection = establish_connection();
 
@@ -52,13 +64,60 @@ fn main() {
         );
     }
 
-    let single_merchant = find_merchant_by_id(&connection, 2).unwrap();
+    assert_merchant_and_transaction_count(&connection, 1, 1);
+    assert_merchant_and_transaction_count(&connection, 2, 1);
+    assert_merchant_and_transaction_count(&connection, 3, 1);
+    assert_merchant_and_transaction_count(&connection, 4, 1);
+    assert_merchant_and_transaction_count(&connection, 5, 1);
+
+    assert_account_and_transaction_count(&connection, 1, 2);
+    assert_account_and_transaction_count(&connection, 2, 0);
+    assert_account_and_transaction_count(&connection, 3, 3);
+
+    assert_category_and_transaction_count(&connection, 1, 2);
+    assert_category_and_transaction_count(&connection, 2, 3);
+}
+
+fn assert_merchant_and_transaction_count(
+    connection: &SqliteConnection,
+    id: i32,
+    transaction_count: usize,
+) {
+    let single_merchant = find_merchant_by_id(&connection, id).unwrap();
     let single_merchant_transactions = Transaction::belonging_to(&single_merchant)
-        .load::<Transaction>(&connection)
+        .load::<Transaction>(connection)
         .unwrap()
         .grouped_by(&[single_merchant]);
     assert_eq!(1, single_merchant_transactions.len());
-    assert_eq!(1, single_merchant_transactions[0].len());
+    assert_eq!(transaction_count, single_merchant_transactions[0].len());
+}
+
+fn assert_account_and_transaction_count(
+    connection: &SqliteConnection,
+    id: i32,
+    transaction_count: usize,
+) {
+    let single_account = find_account_by_id(&connection, id).unwrap();
+    let single_account_transactions = Transaction::belonging_to(&single_account)
+        .load::<Transaction>(connection)
+        .unwrap()
+        .grouped_by(&[single_account]);
+    assert_eq!(1, single_account_transactions.len());
+    assert_eq!(transaction_count, single_account_transactions[0].len());
+}
+
+fn assert_category_and_transaction_count(
+    connection: &SqliteConnection,
+    id: i32,
+    transaction_count: usize,
+) {
+    let single_category = find_category_by_id(&connection, id).unwrap();
+    let single_category_transactions = Transaction::belonging_to(&single_category)
+        .load::<Transaction>(connection)
+        .unwrap()
+        .grouped_by(&[single_category]);
+    assert_eq!(1, single_category_transactions.len());
+    assert_eq!(transaction_count, single_category_transactions[0].len());
 }
 
 pub fn establish_connection() -> SqliteConnection {

@@ -2,7 +2,7 @@
 
 1. Clone the repo
 2. Ensure you've got Rust installed
-3. Run `bin/run`
+3. Run `DATABASE_URL=test.db bin/run`
 4. Change the order of foreign keys on `Transaction` (parts of it should work
    when `merchant_id` is third in the struct)
 

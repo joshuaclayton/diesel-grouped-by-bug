@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 
-rm test.db || true
+rm $DATABASE_URL || true
 diesel migration run
 cargo run

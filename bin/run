@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+rm test.db || true
+diesel migration run
+cargo run
